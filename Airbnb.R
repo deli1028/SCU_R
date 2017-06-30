@@ -3,13 +3,14 @@
 # Title: SCU_R_Final
 
 
-#¸ü¤Jlibrary 
+#è¼‰å…¥library 
 library("dplyr")
 library("ggplot2")
 library("rpart")
 library("rpart.plot")
 library("rattle")
 library("randomForest")
+library("ggmap")
 
 col <- c("integer","character","numeric","numeric","factor","integer","integer","integer",
          "character","integer","factor","integer","factor","numeric")
@@ -32,27 +33,27 @@ lm_fit <- lm(price ~ accommodates + bedrooms, data = airbnb_SF)
 summary(lm_fit)
 
 # ----------
-# ¤Á¤À°V½m»P´ú¸Õ¸ê®Æ
-n <- nrow(airbnb_SF)  #¨ú±oÁ`µ§¼Æ
-set.seed(888)#³]©wÀH¾÷ºØ¤l
+# åˆ‡åˆ†è¨“ç·´èˆ‡æ¸¬è©¦è³‡æ–™
+n <- nrow(airbnb_SF)  #å–å¾—ç¸½ç­†æ•¸
+set.seed(888)#è¨­å®šéš¨æ©Ÿç¨®å­
 shuffled_data <- airbnb_SF[sample(n), ]
 
 train_indices <- 1:round(0.7 * n) 
-train_data <- shuffled_data[train_indices, ] #°V½m¸ê®Æ
+train_data <- shuffled_data[train_indices, ] #è¨“ç·´è³‡æ–™
 test_indices <- (round(0.7 * n) + 1):n
-test_data <- shuffled_data[test_indices, ] #´ú¸Õ¸ê®Æ
+test_data <- shuffled_data[test_indices, ] #æ¸¬è©¦è³‡æ–™
 
 
 
-# «Ø¥ß¨Mµ¦¾ð¤ÀÃþ¼Ò«¬
+# å»ºç«‹æ±ºç­–æ¨¹åˆ†é¡žæ¨¡åž‹
 tree_model <- rpart(review ~ room_type + price_r + reviews_per_month , 
                   data = train_data, method = "class")
 test_predicted = predict(tree_model, test_data, type = "class")
 
 fancyRpartPlot(tree_model) 
 
-# ÁZ®Ä
-cm <- table(test_data$review, test_predicted, dnn = c("¹ê»Ú", "¹w´ú"))
+# ç¸¾æ•ˆ
+cm <- table(test_data$review, test_predicted, dnn = c("å¯¦éš›", "é æ¸¬"))
 cm
 
 conf_mat <- table(test_data$review , test_predicted)
@@ -61,16 +62,16 @@ accuracy
 
 # ----------
 
-# «Ø¥ßÀH¾÷´ËªL¾ð¤ÀÃþ¼Ò«¬
+# å»ºç«‹éš¨æ©Ÿæ£®æž—æ¨¹åˆ†é¡žæ¨¡åž‹
 # install.packages("randomForest")
 
 forest_fit <- randomForest(review ~ room_type + price_r + reviews_per_month, 
                            data = train_data, importane = T, proximity = T, n_tree = 300)
 test_predicted <- predict(forest_fit, test_data)
-cm <- table(test_data$review, test_predicted, dnn = c("¹ê»Ú", "¹w´ú"))
+cm <- table(test_data$review, test_predicted, dnn = c("å¯¦éš›", "é æ¸¬"))
 cm
 
-# ÁZ®Ä
+# ç¸¾æ•ˆ
 conf_matrix <- table(test_predicted, test_data$review)
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
 accuracy
@@ -84,7 +85,7 @@ accuracy
 
 
 # Heatmap
-library(ggmap)
+
 map <- get_map(location = c(-122.443850, lat = 37.754365), 
                zoom = 12, language = "zh-TW", maptype = "roadmap")
 ggmap(map) + geom_point(aes(x = longitude, y = latitude),
